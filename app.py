@@ -43,7 +43,7 @@ class User(db.Model, UserMixin):
     active = db.Column(db.Boolean())
     confirmed_at = db.Column(db.DateTime())
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
-    words = db.relationship('Word', backref='users', lazy='dynamic')
+    words = db.relationship('Words', backref='users', lazy='dynamic')
     # https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
 
 
