@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="uk-container uk-section">
+    <table class="uk-table uk-table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>სიტყვა</th>
+            <th>ასოციაცია</th>
+            <th>კავშირი</th>
+            <th>თარგმანი</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for word in words %}
+        <tr>
+            <td>{{loop.index}}</td>
+            <td>{{word.word}}</td>
+            <td>{{word.assoc}}</td>
+            <td>{{word.hint}}</td>
+            <td>{{word.translation}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{% endblock%}

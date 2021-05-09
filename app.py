@@ -1,9 +1,10 @@
 import os 
-from flask import Flask
-
-from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin
+from flask import Flask, url_for, render_template, redirect
+from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, current_user, login_required
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 
 app = Flask(__name__)
@@ -18,7 +19,7 @@ app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
+admin = Admin(app)
 
 roles_users = db.Table('roles_users',
                        db.Column("user_id", db.Integer(), db.ForeignKey("users.id")),
@@ -31,6 +32,9 @@ class Role (db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(), unique=True)
     description = db.Column(db.String())
+
+    def __repr__(self):
+        return f"<Role {self.name}>"
 
 
 class User(db.Model, UserMixin):
@@ -46,9 +50,8 @@ class User(db.Model, UserMixin):
     words = db.relationship('Words', backref='users', lazy='dynamic')
     # https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
 
-
     def __repr__(self):
-        return '<User %r>' % self.username
+        return f'<User {self.email} >'
 
 
 class Words(db.Model):
@@ -61,7 +64,23 @@ class Words(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<Word %r>' % self.word
+        return f'<Word {self.word}>'
+
+
+class UserView(ModelView):
+    # column_exclude_list = ["password"]
+    can_delete = True
+    can_create = True
+    can_edit = True
+
+
+class WordsView(ModelView):
+    # column_exclude_list = ["password"]
+    can_delete = True
+    can_create = True
+    can_edit = True
+    can_export = True
+
 
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -70,12 +89,39 @@ security = Security(app, user_datastore)
 
 @app.route('/')
 def index():
-    return "Home"
+    if not current_user.is_authenticated:
+        return f"go to login page: <a href='" + url_for("security.login") +"' > Login</a>"
+    return redirect(url_for("profile"))
 
 
 @app.route('/profile')
+@login_required
 def profile():
-    return "Profile"
+    role_names = list((role.name for role in current_user.roles))
+    return render_template('profile.html', title="Profile", roles=role_names)
+
+
+@app.route('/words')
+@login_required
+def words():
+    role_names = list((role.name for role in current_user.roles))
+    if "admin" in role_names:
+        words = Words.query.all()
+        return render_template('words_list.html', title="Words", words=words)
+    words = Words.query.filter(Words.user_id == current_user.id).all()
+    return render_template('words_list.html', title="Words", words=words)
+
+
+@app.route('/about')
+@login_required
+def about():
+    return render_template('about.html', title="About")
+
+
+admin.add_view(UserView(User, db.session))
+admin.add_view(ModelView(Role, db.session))
+admin.add_view(WordsView(Words, db.session))
+
 
 if __name__ == "__main__":
     app.run()

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="uk-container uk-section">
+
+<article class="uk-article">
+
+    <h1 class="uk-article-title"><a class="uk-link-reset" href="">Hello {{current_user.name}}!</a></h1>
+
+    <p class="uk-article-meta">Confirmed on {{current_user.confirmed_at.strftime("%Y, %d %b")}}. </p>
+
+    <p><span class="uk-label">Name:</span> {{current_user.name}}</p>
+    <p><span class="uk-label">Username:</span> {{current_user.username}}</p>
+    <p><span class="uk-label">Email:</span> {{current_user.email}}</p>
+    <p><span class="uk-label">Role:</span> {% for role in roles  %} {{role}} {% endfor %}</p>
+
+
+
+</article>
+
+
+</div>
+
+{% endblock%}

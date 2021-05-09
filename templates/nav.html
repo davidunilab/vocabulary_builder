@@ -1,0 +1,17 @@
+{% from "macros.html" import nav_link_with_icons %}
+<nav class="uk-navbar-container uk-margin" uk-navbar>
+    <div class="uk-navbar-left">
+        <a class="uk-navbar-toggle" uk-navbar-toggle-icon href="#"></a>
+        <a class="uk-navbar-item uk-logo" href="#">Vocabulary Builder</a>
+
+        <ul class="uk-navbar-nav">
+            {{ nav_link_with_icons("profile", 'Profile', 'user') }}
+            {{ nav_link_with_icons("words", 'Words', 'file-text') }}
+            {{ nav_link_with_icons("about", 'About Project', 'info') }}
+            {{ nav_link_with_icons("security.logout", 'Logout', 'sign-out') }}
+            {{ nav_link_with_icons("admin.index", 'Admin', 'user') }}
+            <!--{{ nav_link_with_icons("security.login", 'Login', 'sign-in') }}-->
+        </ul>
+
+    </div>
+</nav>
