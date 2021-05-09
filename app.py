@@ -87,12 +87,16 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 
-@app.route('/')
+@app.route('/test')
 def index():
     if not current_user.is_authenticated:
         return f"go to login page: <a href='" + url_for("security.login") +"' > Login</a>"
     return redirect(url_for("profile"))
 
+
+@app.route('/')
+def test():
+    return render_template("main.html")
 
 @app.route('/profile')
 @login_required
@@ -113,7 +117,6 @@ def words():
 
 
 @app.route('/about')
-@login_required
 def about():
     return render_template('about.html', title="About")
 

@@ -2,15 +2,18 @@
 <nav class="uk-navbar-container uk-margin" uk-navbar>
     <div class="uk-navbar-left">
         <a class="uk-navbar-toggle" uk-navbar-toggle-icon href="#"></a>
-        <a class="uk-navbar-item uk-logo" href="#">Vocabulary Builder</a>
+        <a class="uk-navbar-item uk-logo" href="{{ url_for('test') }}">Vocabulary Builder</a>
 
         <ul class="uk-navbar-nav">
+            {% if current_user.is_authenticated %}
             {{ nav_link_with_icons("profile", 'Profile', 'user') }}
             {{ nav_link_with_icons("words", 'Words', 'file-text') }}
-            {{ nav_link_with_icons("about", 'About Project', 'info') }}
-            {{ nav_link_with_icons("security.logout", 'Logout', 'sign-out') }}
             {{ nav_link_with_icons("admin.index", 'Admin', 'user') }}
-            <!--{{ nav_link_with_icons("security.login", 'Login', 'sign-in') }}-->
+            {{ nav_link_with_icons("security.logout", 'Logout', 'sign-out') }}
+            {% else %}
+            {{ nav_link_with_icons("about", 'About Project', 'info') }}
+            {{ nav_link_with_icons("security.login", 'Login', 'sign-in') }}
+            {% endif %}
         </ul>
 
     </div>
