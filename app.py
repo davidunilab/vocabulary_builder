@@ -1,10 +1,12 @@
 import os 
-from flask import Flask, url_for, render_template, redirect
+from flask import Flask, url_for, render_template, redirect, request
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, current_user, login_required
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_wtf import FlaskForm
+from wtforms import StringField
 
 
 app = Flask(__name__)
@@ -17,9 +19,10 @@ app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_PASSWORD_SALT'] = 'somesaltfortheforum'
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-admin = Admin(app)
+admin = Admin(app, "Vocabulary Builder admin")
 
 roles_users = db.Table('roles_users',
                        db.Column("user_id", db.Integer(), db.ForeignKey("users.id")),
@@ -27,7 +30,7 @@ roles_users = db.Table('roles_users',
                        )
 
 
-class Role (db.Model, RoleMixin):
+class Role(db.Model, RoleMixin):
     __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(), unique=True)
@@ -57,7 +60,7 @@ class User(db.Model, UserMixin):
 class Words(db.Model):
     __tablename__ = 'words'
     id = db.Column(db.Integer(), primary_key=True)
-    word = db.Column(db.String(), unique=True)
+    word = db.Column(db.String())
     assoc = db.Column(db.String())
     hint = db.Column(db.String())
     translation = db.Column(db.String())
@@ -82,21 +85,58 @@ class WordsView(ModelView):
     can_export = True
 
 
+class WordsForm(FlaskForm):
+    word = StringField("Word")
+    assoc = StringField("Association")
+    hint = StringField("Hint")
+    translation = StringField("Translation")
+
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 
-@app.route('/test')
-def index():
-    if not current_user.is_authenticated:
-        return f"go to login page: <a href='" + url_for("security.login") +"' > Login</a>"
-    return redirect(url_for("profile"))
+@app.route('/words-add', methods=["GET", "POST"])
+@login_required
+def add_words():
+    form = WordsForm()
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            word = Words()
+            word.word = request.form.get('word')
+            word.assoc = request.form.get('assoc')
+            word.hint = request.form.get('hint')
+            word.translation = request.form.get('translation')
+            word.user_id = current_user.id
+            db.session.add(word)
+            db.session.commit()
+
+            form.word.data = ''
+            form.assoc.data = ''
+            form.hint.data = ''
+            form.translation.data = ''
+
+    return render_template("add_words.html", title="Add word", form=form)
+
+
+@app.route('/words-rm', methods=["GET", "POST"])
+@login_required
+def rm_words():
+    words = Words.query.filter(Words.user_id == current_user.id).all()
+    if request.method == 'POST':
+        if request.form.get("word_id"):
+            words = Words.query.filter(Words.user_id == current_user.id).filter(Words.id == request.form.get("word_id")).first()
+            db.session.delete(words)
+            db.session.commit()
+        return redirect(url_for("rm_words"))
+    return render_template("rm-words.html", title='Remove Words', words=words)
 
 
 @app.route('/')
 def test():
     return render_template("main.html")
+
 
 @app.route('/profile')
 @login_required
@@ -105,7 +145,7 @@ def profile():
     return render_template('profile.html', title="Profile", roles=role_names)
 
 
-@app.route('/words')
+@app.route('/words-list')
 @login_required
 def words():
     role_names = list((role.name for role in current_user.roles))

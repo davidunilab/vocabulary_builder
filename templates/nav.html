@@ -7,13 +7,25 @@
         <ul class="uk-navbar-nav">
             {% if current_user.is_authenticated %}
             {{ nav_link_with_icons("profile", 'Profile', 'user') }}
-            {{ nav_link_with_icons("words", 'Words', 'file-text') }}
+             <li>
+                <a href="#">Words</a>
+             <div class="uk-navbar-dropdown">
+                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                        {{ nav_link_with_icons("words", 'Words', 'file-text') }}
+                        {{ nav_link_with_icons("add_words", 'Add Words', 'file-text') }}
+                        {{ nav_link_with_icons("rm_words", 'Delete Words', 'file-text') }}
+                    </ul>
+                </div>
+            </li>
+
+            {{ nav_link_with_icons("about", 'About Project', 'info') }}
             {{ nav_link_with_icons("admin.index", 'Admin', 'user') }}
             {{ nav_link_with_icons("security.logout", 'Logout', 'sign-out') }}
             {% else %}
             {{ nav_link_with_icons("about", 'About Project', 'info') }}
             {{ nav_link_with_icons("security.login", 'Login', 'sign-in') }}
             {% endif %}
+
         </ul>
 
     </div>

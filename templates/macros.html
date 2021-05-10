@@ -32,3 +32,13 @@
 {% endif %}
 {% endmacro %}
 
+
+
+{% macro textinput(form) %}
+        <div class="uk-margin">
+            <label class="uk-form-label" for="{{form.id}}"> {{form.label}} </label>
+            <div class="uk-form-controls">
+                {{form}}
+            </div>
+        </div>
+{% endmacro %}
