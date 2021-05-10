@@ -7,6 +7,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_wtf import FlaskForm
 from wtforms import StringField
+from flask_script import Manager, Command
 
 
 app = Flask(__name__)
@@ -22,6 +23,7 @@ app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+manager = Manager(app)
 admin = Admin(app, "Vocabulary Builder admin")
 
 roles_users = db.Table('roles_users',
@@ -165,6 +167,10 @@ admin.add_view(UserView(User, db.session))
 admin.add_view(ModelView(Role, db.session))
 admin.add_view(WordsView(Words, db.session))
 
+@app.before_first_request
+def before_first_request_func():
+    db.create_all()
 
 if __name__ == "__main__":
+
     app.run()
