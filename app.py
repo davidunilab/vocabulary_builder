@@ -170,7 +170,11 @@ admin.add_view(WordsView(Words, db.session))
 @app.before_first_request
 def before_first_request_func():
     db.create_all()
+    # user_datastore.create_role(name='admin')
+    # user_datastore.create_user(username='David', email='davidchincharashvili@gmail.com',
+    #                            password='david123', roles=['admin'])
+
+
 
 if __name__ == "__main__":
-
     app.run()
